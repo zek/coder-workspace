@@ -93,7 +93,8 @@ RUN EXTENSIONS="anthropic.claude-code msjsdiag.vscode-react-native dbaeumer.vsco
       /opt/code-server/bin/code-server \
         --extensions-dir /etc/skel/.local/share/code-server/extensions \
         --install-extension "$ext" || true; \
-    done
+    done && \
+    chmod -R a+rX /etc/skel/.local
 
 # ============================================
 # Maestro CLI (E2E testing for Android/iOS/Web)
