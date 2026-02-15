@@ -21,7 +21,8 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       watchman ripgrep jq unzip python3-pip pipx \
-      zsh fzf bat fd-find eza gh && \
+      zsh fzf bat fd-find eza gh \
+      openjdk-17-jdk-headless && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # ============================================
@@ -61,6 +62,13 @@ RUN curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install
     install -m 755 /root/.local/bin/uv /usr/local/bin/uv && \
     install -m 755 /root/.local/bin/uvx /usr/local/bin/uvx && \
     rm -rf /root/.local/bin/uv /root/.local/bin/uvx
+
+# ============================================
+# Maestro CLI (E2E testing for Android/iOS/Web)
+# ============================================
+RUN curl -fsSL "https://get.maestro.mobile.dev" | bash && \
+    install -m 755 /root/.maestro/bin/maestro /usr/local/bin/maestro && \
+    rm -rf /root/.maestro
 
 # ============================================
 # Skel: dotfiles staged for first-start copy
