@@ -31,6 +31,9 @@ setopt SHARE_HISTORY HIST_IGNORE_ALL_DUPS HIST_IGNORE_SPACE HIST_REDUCE_BLANKS
 export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.maestro/bin:$PATH"
 [ -d "$HOME/Android/Sdk" ] && export ANDROID_HOME="$HOME/Android/Sdk" && export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools"
 
+# -- fnm (Fast Node Manager) --
+command -v fnm &>/dev/null && eval "$(fnm env --use-on-cd)"
+
 # -- Modern CLI aliases --
 command -v eza &>/dev/null && alias ls='eza --color=auto --icons=auto' && alias ll='eza -la --icons=auto --git' && alias lt='eza --tree --level=2 --icons=auto'
 command -v bat &>/dev/null && export BAT_THEME="TwoDark" && export MANPAGER="sh -c 'col -bx | bat -l man -p'" && alias cat='bat --paging=never'

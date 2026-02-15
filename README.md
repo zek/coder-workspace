@@ -8,7 +8,8 @@ Extends `codercom/enterprise-base:ubuntu` to eliminate per-workspace install tim
 
 | Category | Tools |
 |----------|-------|
-| **APT** | Node.js 20, watchman, ripgrep, jq, unzip, pipx, zsh, fzf, bat, fd, eza, gh |
+| **APT** | watchman, ripgrep, jq, unzip, pipx, zsh, fzf, bat, fd, eza, gh |
+| **fnm** | Node.js 24 (via fnm - supports .nvmrc, `fnm install <ver>` for more) |
 | **npm** | eas-cli, claude-code, playwriter, agentation-mcp |
 | **Binary** | zoxide, starship, uv |
 | **Shell** | zimfw + plugins, starship prompt, modern CLI aliases |

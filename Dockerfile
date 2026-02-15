@@ -3,10 +3,9 @@ FROM codercom/enterprise-base:ubuntu
 USER root
 
 # ============================================
-# APT repositories
+# APT repositories (GitHub CLI, eza)
 # ============================================
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
       | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg 2>/dev/null && \
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] \
       https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list && \
@@ -21,7 +20,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
 # ============================================
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      nodejs watchman ripgrep jq unzip python3-pip pipx \
+      watchman ripgrep jq unzip python3-pip pipx \
       zsh fzf bat fd-find eza gh && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -30,6 +29,18 @@ RUN apt-get update && \
 # ============================================
 RUN [ -f /usr/bin/batcat ] && ln -sf /usr/bin/batcat /usr/local/bin/bat || true && \
     [ -f /usr/bin/fdfind ] && ln -sf /usr/bin/fdfind /usr/local/bin/fd || true
+
+# ============================================
+# fnm (Fast Node Manager) + Node.js 24
+# ============================================
+ENV FNM_DIR=/opt/fnm
+RUN curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir /usr/local/bin --skip-shell && \
+    fnm install 24 && \
+    fnm default 24 && \
+    ln -s $(fnm exec --using=24 -- which node) /usr/local/bin/node && \
+    ln -s $(fnm exec --using=24 -- which npm) /usr/local/bin/npm && \
+    ln -s $(fnm exec --using=24 -- which npx) /usr/local/bin/npx && \
+    chmod -R a+rx /opt/fnm
 
 # ============================================
 # npm global packages
