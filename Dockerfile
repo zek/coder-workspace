@@ -92,4 +92,6 @@ RUN mkdir -p /etc/skel/.zim && \
 # ============================================
 RUN printf '\n# Switch to ZSH for interactive sessions\nif [ -t 1 ] && [ -x /usr/bin/zsh ] && [ -z "$ZSH_VERSION" ]; then\n  exec /usr/bin/zsh -l\nfi\n' >> /etc/skel/.bashrc
 
+RUN chsh -s /usr/bin/zsh coder
+
 USER coder
