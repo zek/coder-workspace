@@ -80,6 +80,22 @@ RUN ARCH=$(uname -m) && \
     chmod 755 /usr/local/bin/agentapi
 
 # ============================================
+# code-server (VS Code in browser)
+# ============================================
+RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/opt/code-server && \
+    chmod -R a+rx /opt/code-server
+
+# Pre-install VS Code extensions into skel (copied to user home on first start)
+RUN EXTENSIONS="anthropic.claude-code msjsdiag.vscode-react-native dbaeumer.vscode-eslint \
+      esbenp.prettier-vscode dsznajder.es7-react-js-snippets formulahendry.auto-rename-tag \
+      bradlc.vscode-tailwindcss highagency.pencildev" && \
+    for ext in $EXTENSIONS; do \
+      /opt/code-server/bin/code-server \
+        --extensions-dir /etc/skel/.local/share/code-server/extensions \
+        --install-extension "$ext" || true; \
+    done
+
+# ============================================
 # Maestro CLI (E2E testing for Android/iOS/Web)
 # ============================================
 RUN curl -fsSL "https://get.maestro.mobile.dev" | bash && \
