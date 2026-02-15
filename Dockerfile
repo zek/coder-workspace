@@ -68,6 +68,18 @@ RUN curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install
     rm -rf /root/.local/bin/uv /root/.local/bin/uvx
 
 # ============================================
+# AgentAPI (Coder AI task runner)
+# ============================================
+ARG AGENTAPI_VERSION=v0.11.8
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then BINARY="agentapi-linux-amd64"; \
+    elif [ "$ARCH" = "aarch64" ]; then BINARY="agentapi-linux-arm64"; \
+    else echo "Unsupported arch: $ARCH" && exit 1; fi && \
+    curl -fsSL -o /usr/local/bin/agentapi \
+      "https://github.com/coder/agentapi/releases/download/${AGENTAPI_VERSION}/${BINARY}" && \
+    chmod 755 /usr/local/bin/agentapi
+
+# ============================================
 # Maestro CLI (E2E testing for Android/iOS/Web)
 # ============================================
 RUN curl -fsSL "https://get.maestro.mobile.dev" | bash && \
