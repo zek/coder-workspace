@@ -31,7 +31,8 @@ RUN apt-get update && \
 # ============================================
 # Layer 3: Database directories & permissions (rarely changes)
 # ============================================
-RUN mkdir -p /var/run/postgresql && chown coder:coder /var/run/postgresql && \
+RUN mkdir -p /var/run/postgresql && chown postgres:postgres /var/run/postgresql && chmod 2775 /var/run/postgresql && \
+    usermod -aG postgres coder && \
     mkdir -p /home/coder/.local/share/postgresql && \
     chown -R coder:coder /home/coder/.local/share/postgresql && \
     mkdir -p /var/run/redis && chown coder:coder /var/run/redis && \
