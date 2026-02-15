@@ -50,7 +50,11 @@ RUN npm install -g \
       eas-cli \
       @anthropic-ai/claude-code \
       playwriter \
-      agentation-mcp
+      agentation-mcp && \
+    ln -s $(fnm exec --using=24 -- which claude) /usr/local/bin/claude && \
+    ln -s $(fnm exec --using=24 -- which eas) /usr/local/bin/eas && \
+    ln -s $(fnm exec --using=24 -- which playwriter) /usr/local/bin/playwriter && \
+    ln -s $(fnm exec --using=24 -- which agentation-mcp) /usr/local/bin/agentation-mcp
 
 # ============================================
 # Binary tools (installed to /usr/local/bin)
