@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "playwriter": {
+      "type": "stdio",
+      "command": "playwriter",
+      "args": ["serve"]
+    },
+    "agentation": {
+      "type": "stdio",
+      "command": "agentation-mcp",
+      "args": ["server"]
+    }
+  }
+}

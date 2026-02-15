@@ -1,0 +1,55 @@
+command_timeout = 500
+add_newline = false
+
+format = """$directory$git_branch$git_status$nodejs$python$docker_context$cmd_duration$line_break$character"""
+
+[character]
+success_symbol = "[>](bold green)"
+error_symbol = "[>](bold red)"
+
+[directory]
+truncation_length = 4
+truncate_to_repo = true
+style = "bold blue"
+
+[git_branch]
+format = "[$symbol$branch(:$remote_branch)]($style) "
+symbol = ""
+style = "bold purple"
+truncation_length = 24
+
+[git_status]
+format = '([$all_status$ahead_behind]($style) )'
+style = "bold red"
+
+[nodejs]
+format = "[$symbol$version]($style) "
+symbol = "node "
+style = "bold green"
+detect_folders = []
+
+[python]
+format = "[$symbol$version(\\($virtualenv\\))]($style) "
+symbol = "py "
+style = "bold yellow"
+
+[docker_context]
+format = "[$symbol$context]($style) "
+symbol = "docker "
+only_with_files = true
+
+[cmd_duration]
+min_time = 2_000
+format = "[$duration]($style) "
+style = "bold yellow"
+
+[package]
+disabled = true
+[container]
+disabled = true
+[aws]
+disabled = true
+[gcloud]
+disabled = true
+[kubernetes]
+disabled = true
