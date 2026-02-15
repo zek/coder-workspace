@@ -59,8 +59,8 @@ RUN npm install -g \
 # ============================================
 # Binary tools (installed to /usr/local/bin)
 # ============================================
-RUN curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh \
-      | BIN_DIR=/usr/local/bin bash && \
+RUN curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash && \
+    install -m 755 /root/.local/bin/zoxide /usr/local/bin/zoxide && \
     curl -sS https://starship.rs/install.sh | sh -s -- -y && \
     curl -LsSf https://astral.sh/uv/install.sh | sh && \
     install -m 755 /root/.local/bin/uv /usr/local/bin/uv && \
