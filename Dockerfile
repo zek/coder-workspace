@@ -71,8 +71,9 @@ RUN curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install
 # Maestro CLI (E2E testing for Android/iOS/Web)
 # ============================================
 RUN curl -fsSL "https://get.maestro.mobile.dev" | bash && \
-    install -m 755 /root/.maestro/bin/maestro /usr/local/bin/maestro && \
-    rm -rf /root/.maestro
+    mv /root/.maestro /opt/maestro && \
+    ln -s /opt/maestro/bin/maestro /usr/local/bin/maestro && \
+    chmod -R a+rx /opt/maestro
 
 # ============================================
 # Skel: dotfiles staged for first-start copy
