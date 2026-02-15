@@ -41,16 +41,18 @@ RUN curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir /usr/lo
     ln -s $(fnm exec --using=24 -- which node) /usr/local/bin/node && \
     ln -s $(fnm exec --using=24 -- which npm) /usr/local/bin/npm && \
     ln -s $(fnm exec --using=24 -- which npx) /usr/local/bin/npx && \
-    chmod -R a+rx /opt/fnm
+    chmod -R a+rwx /opt/fnm
 
 # ============================================
 # npm global packages
 # ============================================
 RUN npm install -g \
+      pnpm \
       eas-cli \
       @anthropic-ai/claude-code \
       playwriter \
       agentation-mcp && \
+    ln -s $(fnm exec --using=24 -- which pnpm) /usr/local/bin/pnpm && \
     ln -s $(fnm exec --using=24 -- which claude) /usr/local/bin/claude && \
     ln -s $(fnm exec --using=24 -- which eas) /usr/local/bin/eas && \
     ln -s $(fnm exec --using=24 -- which playwriter) /usr/local/bin/playwriter && \
