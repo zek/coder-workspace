@@ -3,7 +3,7 @@ FROM codercom/enterprise-base:ubuntu
 USER root
 
 # ============================================
-# APT repositories (GitHub CLI, eza)
+# Layer 1: APT repositories (rarely changes)
 # ============================================
 RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
       | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg 2>/dev/null && \
@@ -16,23 +16,37 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
       > /etc/apt/sources.list.d/gierens.list
 
 # ============================================
-# APT packages
+# Layer 2: APT packages + databases (rarely changes)
 # ============================================
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       watchman ripgrep jq unzip python3-pip pipx \
       zsh fzf bat fd-find eza gh \
-      openjdk-17-jdk-headless && \
+      openjdk-17-jdk-headless \
+      postgresql postgresql-client \
+      redis-server \
+      mysql-server mysql-client && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # ============================================
-# Symlinks (Ubuntu names differ from upstream)
+# Layer 3: Database directories & permissions (rarely changes)
+# ============================================
+RUN mkdir -p /var/run/postgresql && chown coder:coder /var/run/postgresql && \
+    mkdir -p /home/coder/.local/share/postgresql && \
+    chown -R coder:coder /home/coder/.local/share/postgresql && \
+    mkdir -p /var/run/redis && chown coder:coder /var/run/redis && \
+    mkdir -p /var/run/mysqld && chown coder:coder /var/run/mysqld && \
+    mkdir -p /home/coder/.local/share/mysql && \
+    chown -R coder:coder /home/coder/.local/share/mysql
+
+# ============================================
+# Layer 4: Symlinks (rarely changes)
 # ============================================
 RUN [ -f /usr/bin/batcat ] && ln -sf /usr/bin/batcat /usr/local/bin/bat || true && \
     [ -f /usr/bin/fdfind ] && ln -sf /usr/bin/fdfind /usr/local/bin/fd || true
 
 # ============================================
-# fnm (Fast Node Manager) + Node.js 24
+# Layer 5: fnm + Node.js (changes on Node major version bump)
 # ============================================
 ENV FNM_DIR=/opt/fnm
 RUN curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir /usr/local/bin --skip-shell && \
@@ -44,7 +58,44 @@ RUN curl -fsSL https://fnm.vercel.app/install | bash -s -- --install-dir /usr/lo
     chmod -R a+rwx /opt/fnm
 
 # ============================================
-# npm global packages
+# Layer 6: Binary tools (rarely changes)
+# ============================================
+RUN curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash && \
+    install -m 755 /root/.local/bin/zoxide /usr/local/bin/zoxide && \
+    curl -sS https://starship.rs/install.sh | sh -s -- -y && \
+    curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    install -m 755 /root/.local/bin/uv /usr/local/bin/uv && \
+    install -m 755 /root/.local/bin/uvx /usr/local/bin/uvx && \
+    rm -rf /root/.local/bin/uv /root/.local/bin/uvx
+
+# ============================================
+# Layer 7: AgentAPI (changes on version bump)
+# ============================================
+ARG AGENTAPI_VERSION=v0.11.8
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then BINARY="agentapi-linux-amd64"; \
+    elif [ "$ARCH" = "aarch64" ]; then BINARY="agentapi-linux-arm64"; \
+    else echo "Unsupported arch: $ARCH" && exit 1; fi && \
+    curl -fsSL -o /usr/local/bin/agentapi \
+      "https://github.com/coder/agentapi/releases/download/${AGENTAPI_VERSION}/${BINARY}" && \
+    chmod 755 /usr/local/bin/agentapi
+
+# ============================================
+# Layer 8: code-server (rarely changes)
+# ============================================
+RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/opt/code-server && \
+    chmod -R a+rx /opt/code-server
+
+# ============================================
+# Layer 9: Maestro CLI (rarely changes)
+# ============================================
+RUN curl -fsSL "https://get.maestro.mobile.dev" | bash && \
+    mv /root/.maestro /opt/maestro && \
+    ln -s /opt/maestro/bin/maestro /usr/local/bin/maestro && \
+    chmod -R a+rx /opt/maestro
+
+# ============================================
+# Layer 10: npm global packages (changes most often)
 # ============================================
 RUN npm install -g \
       pnpm \
@@ -59,35 +110,8 @@ RUN npm install -g \
     ln -s $(fnm exec --using=24 -- which agentation-mcp) /usr/local/bin/agentation-mcp
 
 # ============================================
-# Binary tools (installed to /usr/local/bin)
+# Layer 11: VS Code extensions (changes occasionally)
 # ============================================
-RUN curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash && \
-    install -m 755 /root/.local/bin/zoxide /usr/local/bin/zoxide && \
-    curl -sS https://starship.rs/install.sh | sh -s -- -y && \
-    curl -LsSf https://astral.sh/uv/install.sh | sh && \
-    install -m 755 /root/.local/bin/uv /usr/local/bin/uv && \
-    install -m 755 /root/.local/bin/uvx /usr/local/bin/uvx && \
-    rm -rf /root/.local/bin/uv /root/.local/bin/uvx
-
-# ============================================
-# AgentAPI (Coder AI task runner)
-# ============================================
-ARG AGENTAPI_VERSION=v0.11.8
-RUN ARCH=$(uname -m) && \
-    if [ "$ARCH" = "x86_64" ]; then BINARY="agentapi-linux-amd64"; \
-    elif [ "$ARCH" = "aarch64" ]; then BINARY="agentapi-linux-arm64"; \
-    else echo "Unsupported arch: $ARCH" && exit 1; fi && \
-    curl -fsSL -o /usr/local/bin/agentapi \
-      "https://github.com/coder/agentapi/releases/download/${AGENTAPI_VERSION}/${BINARY}" && \
-    chmod 755 /usr/local/bin/agentapi
-
-# ============================================
-# code-server (VS Code in browser)
-# ============================================
-RUN curl -fsSL https://code-server.dev/install.sh | sh -s -- --method=standalone --prefix=/opt/code-server && \
-    chmod -R a+rx /opt/code-server
-
-# Pre-install VS Code extensions into skel (copied to user home on first start)
 RUN EXTENSIONS="anthropic.claude-code msjsdiag.vscode-react-native dbaeumer.vscode-eslint \
       esbenp.prettier-vscode dsznajder.es7-react-js-snippets formulahendry.auto-rename-tag \
       bradlc.vscode-tailwindcss highagency.pencildev" && \
@@ -99,15 +123,7 @@ RUN EXTENSIONS="anthropic.claude-code msjsdiag.vscode-react-native dbaeumer.vsco
     chmod -R a+rX /etc/skel/.local
 
 # ============================================
-# Maestro CLI (E2E testing for Android/iOS/Web)
-# ============================================
-RUN curl -fsSL "https://get.maestro.mobile.dev" | bash && \
-    mv /root/.maestro /opt/maestro && \
-    ln -s /opt/maestro/bin/maestro /usr/local/bin/maestro && \
-    chmod -R a+rx /opt/maestro
-
-# ============================================
-# Skel: dotfiles staged for first-start copy
+# Layer 12: Skel dotfiles (changes occasionally)
 # ============================================
 COPY skel/.zshenv   /etc/skel/.zshenv
 COPY skel/.zimrc    /etc/skel/.zimrc
@@ -116,7 +132,7 @@ COPY skel/.config/  /etc/skel/.config/
 COPY skel/.claude/  /etc/skel/.claude/
 
 # ============================================
-# zimfw: download manager + install plugins
+# Layer 13: zimfw plugins (rarely changes)
 # ============================================
 RUN mkdir -p /etc/skel/.zim && \
     curl -fsSL --create-dirs -o /etc/skel/.zim/zimfw.zsh \
@@ -124,7 +140,7 @@ RUN mkdir -p /etc/skel/.zim && \
     HOME=/etc/skel zsh -c 'source /etc/skel/.zim/zimfw.zsh && zimfw install' 2>/dev/null || true
 
 # ============================================
-# Auto-switch bash to zsh (append to skel .bashrc)
+# Layer 14: Shell config (rarely changes)
 # ============================================
 RUN printf '\n# Switch to ZSH for interactive sessions\nif [ -t 1 ] && [ -x /usr/bin/zsh ] && [ -z "$ZSH_VERSION" ]; then\n  exec /usr/bin/zsh -l\nfi\n' >> /etc/skel/.bashrc
 
