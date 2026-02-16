@@ -96,16 +96,19 @@ RUN curl -fsSL "https://get.maestro.mobile.dev" | bash && \
     chmod -R a+rx /opt/maestro
 
 # ============================================
-# Layer 10: npm global packages (changes most often)
+# Layer 10: Claude Code native installer
+# ============================================
+RUN curl -fsSL https://claude.ai/install.sh | sh
+
+# ============================================
+# Layer 11: npm global packages (changes most often)
 # ============================================
 RUN npm install -g \
       pnpm \
       eas-cli \
-      @anthropic-ai/claude-code \
       playwriter \
       agentation-mcp && \
     ln -s $(fnm exec --using=24 -- which pnpm) /usr/local/bin/pnpm && \
-    ln -s $(fnm exec --using=24 -- which claude) /usr/local/bin/claude && \
     ln -s $(fnm exec --using=24 -- which eas) /usr/local/bin/eas && \
     ln -s $(fnm exec --using=24 -- which playwriter) /usr/local/bin/playwriter && \
     ln -s $(fnm exec --using=24 -- which agentation-mcp) /usr/local/bin/agentation-mcp
