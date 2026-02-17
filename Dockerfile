@@ -107,6 +107,7 @@ RUN npm install -g \
       pnpm \
       eas-cli \
       playwriter \
+      playwright-core \
       agentation-mcp && \
     ln -s $(fnm exec --using=24 -- which pnpm) /usr/local/bin/pnpm && \
     ln -s $(fnm exec --using=24 -- which eas) /usr/local/bin/eas && \
