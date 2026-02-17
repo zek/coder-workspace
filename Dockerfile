@@ -99,7 +99,7 @@ RUN curl -fsSL "https://get.maestro.mobile.dev" | bash && \
 # Layer 10: Claude Code native installer
 # ============================================
 RUN curl -fsSL https://claude.ai/install.sh | bash && \
-    ln -sf /root/.local/bin/claude /usr/local/bin/claude
+    install -m 755 /root/.local/bin/claude /usr/local/bin/claude
 
 # ============================================
 # Layer 11: npm global packages (changes most often)
